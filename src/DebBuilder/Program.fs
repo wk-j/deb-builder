@@ -2,6 +2,7 @@
 open System.Reflection
 open System.IO
 open System.IO.Compression
+open StartProcess
 
 type Service = {
     ExecStart: string
@@ -105,6 +106,17 @@ let createZip (command: Commands) =
 
     ZipFile.CreateFromDirectory(command.TempDir, outputPath);
 
+let createDeb (command: Commands) =
+    let dir = command.OutputDir
+    if Directory.Exists dir |> not then
+        Directory.CreateDirectory dir |> ignore
+
+    let outputName = sprintf "%s.%s.deb" command.Name command.Version
+    let outputPath = Path.Combine(dir, outputName)
+
+    let cmd = sprintf "dpkg-deb --build %s %s" command.TempDir outputPath
+    Processor.StartProcess cmd
+
 [<EntryPoint>]
 let main argv =
     let asm = Assembly.GetCallingAssembly();
@@ -145,5 +157,6 @@ let main argv =
     let targetDir = DirectoryInfo (sprintf "%s/opt/%s" tempDir command.Name)
 
     copyDirs appDir targetDir
-    createZip command
+    createDeb command
+
     0
