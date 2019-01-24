@@ -1,0 +1,5 @@
+Package: {name}
+Version: {version}
+Maintainer: wk-j
+Architecture: all
+Description: {name} {version}
